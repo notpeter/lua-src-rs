@@ -136,7 +136,7 @@ impl Build {
             _ if target.contains("linux") => {
                 config.define("LUA_USE_LINUX", None);
             }
-            _ if target.ends_with("bsd") => {
+            _ if target.ends_with("bsd") || target.contains("dragonfly") => {
                 config.define("LUA_USE_LINUX", None);
             }
             _ if target.ends_with("illumos") => {
