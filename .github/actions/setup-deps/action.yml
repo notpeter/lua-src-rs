@@ -9,10 +9,10 @@ inputs:
     default: latest
   wasi_sdk:
     description: 'wasi-sdk version to install'
-    default: 32
+    default: 33
   wasmtime:
     description: 'wasmtime version to install'
-    default: v43.0.0
+    default: v47.0.3
 
 runs:
   using: composite
