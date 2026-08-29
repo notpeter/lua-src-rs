@@ -28,6 +28,7 @@ pub struct Build {
 pub struct Artifacts {
     include_dir: PathBuf,
     lib_dir: PathBuf,
+    lua_lib: String,
     libs: Vec<String>,
 }
 
@@ -131,7 +132,8 @@ impl Build {
             }
         }
 
-        let mut libs = vec![version.lib_name().to_string()];
+        let lua_lib = version.lib_name().to_string();
+        let mut libs = vec![lua_lib.clone()];
         match target {
             _ if target.contains("linux") => {
                 config.define("LUA_USE_LINUX", None);
@@ -223,7 +225,7 @@ impl Build {
             .flag_if_supported("-fno-common") // Compile common globals like normal definitions
             .add_files_by_ext(&source_dir, "c")?
             .out_dir(&lib_dir)
-            .try_compile(version.lib_name())?;
+            .try_compile(&lua_lib)?;
 
         for f in &["lauxlib.h", "lua.h", "luaconf.h", "lualib.h"] {
             let from = source_dir.join(f);
@@ -235,6 +237,7 @@ impl Build {
         Ok(Artifacts {
             include_dir,
             lib_dir,
+            lua_lib,
             libs,
         })
     }
@@ -284,7 +287,8 @@ impl Artifacts {
     /// about the location of the Lua libraries and how to link them.
     pub fn print_cargo_metadata(&self) {
         println!("cargo:rustc-link-search=native={}", self.lib_dir.display());
-        for lib in self.libs.iter() {
+        println!("cargo:rustc-link-lib=static={}", self.lua_lib);
+        for lib in self.libs.iter().filter(|lib| *lib != &self.lua_lib) {
             println!("cargo:rustc-link-lib=static:-bundle={lib}");
         }
         println!("cargo:include={}", self.include_dir.display());
